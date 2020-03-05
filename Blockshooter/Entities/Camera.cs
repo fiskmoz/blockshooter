@@ -25,7 +25,7 @@ namespace Blockshooter.Entities
         {
             // SETUP CAMERA
             Target = new Vector3(0f, 0f, -1f);
-            Position = new Vector3(0f, 0f, -100f);
+            Position = new Vector3(0f, 40f, 20f);
             Up = Vector3.Up;
             ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45f), graphicsDevice.DisplayMode.AspectRatio, 1f, 1000f);
             ViewMatrix = Matrix.CreateLookAt(Position, Target, Up);
@@ -35,7 +35,7 @@ namespace Blockshooter.Entities
 
         public void UpdateCamera()
         {
-            WorldMatrix = Matrix.CreateLookAt(Position, Position + Target, Up);
+            ViewMatrix = Matrix.CreateLookAt(Position, Position + Target, Up);
         }
     }
 }

@@ -9,8 +9,8 @@
     <ProjectGuid>{62325137-2A06-4FAC-94AB-6AAD489063D6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Blockshooter2</RootNamespace>
-    <AssemblyName>Blockshooter2</AssemblyName>
+    <RootNamespace>Blockshooter</RootNamespace>
+    <AssemblyName>Blockshooter</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MonoGamePlatform>Windows</MonoGamePlatform>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -41,8 +41,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Entities\Block.cs" />
     <Compile Include="Entities\Camera.cs" />
     <Compile Include="Entities\Floor.cs" />
+    <Compile Include="Entities\PhysicsEntity.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

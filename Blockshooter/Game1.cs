@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Blockshooter
 {
@@ -12,6 +13,7 @@ namespace Blockshooter
 
         Camera camera;
         Floor floor;
+        List<Block> blockList;
 
         BasicEffect basicEffect;
 
@@ -46,7 +48,8 @@ namespace Blockshooter
             vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 3, BufferUsage.WriteOnly);
             vertexBuffer.SetData<VertexPositionColor>(triangleVerticies);
             camera = new Camera(GraphicsDevice);
-            floor = new Floor();
+            floor = new Floor(GraphicsDevice);
+            blockList = new List<Block>();
 
         }
 
@@ -87,26 +90,35 @@ namespace Blockshooter
                 camera.Target -= y * mouseAmount * camera.Up;
                 camera.Target.Normalize();
             }
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                blockList.Add(new Block(GraphicsDevice, camera.Position + camera.Target, Color.Black));
+            }
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                camera.Position.X -= 1f;
+                camera.Position += normal;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                camera.Position.X += 1f;
+                camera.Position -= normal;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                camera.Position.Z += 1f;
+                camera.Position.Z = camera.Position.Z + camera.Target.Z;
+                camera.Position.X = camera.Position.X + camera.Target.X;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
-                camera.Position.Z -= 1f;
+                camera.Position.Z = camera.Position.Z - camera.Target.Z;
+                camera.Position.X = camera.Position.X - camera.Target.X;
             }
 
 
             camera.UpdateCamera();
-
+            foreach (Block block in blockList)
+            {
+                block.UpdateGravity();
+            }
 
             base.Update(gameTime);
         }
@@ -119,7 +131,6 @@ namespace Blockshooter
             basicEffect.World = camera.WorldMatrix;
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            GraphicsDevice.SetVertexBuffer(vertexBuffer);
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
@@ -129,8 +140,15 @@ namespace Blockshooter
             foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
+                GraphicsDevice.SetVertexBuffer(vertexBuffer);
                 GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, 3);
-                GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, floor.Vertexts, 0, 2);
+                GraphicsDevice.SetVertexBuffer(floor.vertexBuffer);
+                GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, 6);
+                foreach (Block block in blockList)
+                {
+                    GraphicsDevice.SetVertexBuffer(block.vertexBuffer);
+                    GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, 8);
+                }
             }
 
             base.Draw(gameTime);
