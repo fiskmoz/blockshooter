@@ -44,7 +44,6 @@
     <Compile Include="Entities\Block.cs" />
     <Compile Include="Entities\Camera.cs" />
     <Compile Include="Entities\Floor.cs" />
-    <Compile Include="Entities\PhysicsEntity.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

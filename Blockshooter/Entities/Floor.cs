@@ -33,6 +33,7 @@ namespace Blockshooter.Entities
 
             vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 8, BufferUsage.WriteOnly);
             vertexBuffer.SetData<VertexPositionColor>(Vertexts);
+            collisionBox = new BoundingBox(new Vector3(-200, -10, -200), new Vector3(200, 0, 200));
         }
     }
 }
