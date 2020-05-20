@@ -8,26 +8,33 @@ using System.Threading.Tasks;
 
 namespace Blockshooter.Entities
 {
-    class Block
+    class Player
     {
         public BoundingBox collisionBox;
         public VertexPositionColor[] vertices;
         public int verticiesLen;
         public VertexBuffer vertexBuffer;
         GraphicsDevice GraphicsDevice;
-        public Vector3 velocity; 
+        public Vector3 velocity;
         public float gravityVelocity = 0.2f;
-        public float velocityDropoff = 0.08f;
+        public Camera Camera;
+        public Vector3 previousLocation;
+        float width = 3;
+        float height = 50;
+        float depth = 3;
+        public Vector3 playerCameraOffset;
+        public bool canMove;
 
-        public Block (GraphicsDevice graphicsDevice, Vector3 startLocation, Vector3 _velocity, Color color)
+        public Player(GraphicsDevice graphicsDevice, Camera camera, Vector3 _velocity, Color color)
         {
+            Camera = camera;
             GraphicsDevice = graphicsDevice;
             verticiesLen = 36;
             vertices = new VertexPositionColor[verticiesLen];
-            float width = 15;
-            float height = 15;
-            float depth = 15;
+            playerCameraOffset = new Vector3(-width/2, -height -5, -depth/2);
             velocity = _velocity;
+            previousLocation = camera.Position;
+            var startLocation = camera.Position + playerCameraOffset;
 
             //front left bottom corner
             vertices[0] = new VertexPositionColor(startLocation + new Vector3(0, 0, 0), color);
@@ -119,22 +126,19 @@ namespace Blockshooter.Entities
             vertexBuffer.SetData<VertexPositionColor>(vertices);
         }
 
-        public void UpdateGravity()
+        public void UpdateMovement()
         {
-            velocity -= new Vector3(0, velocityDropoff, 0);
+            
             for (int i = 0; i < vertices.Count(); i++)
             {
-                vertices[i].Position = vertices[i].Position - new Vector3(0f, gravityVelocity, 0f) + velocity;
+                vertices[i].Position = Camera.Position + (vertices[i].Position - previousLocation - playerCameraOffset) + playerCameraOffset;
             }
-            vertexBuffer.SetData<VertexPositionColor>(vertices);
+            if (canMove)
+            {
+                vertexBuffer.SetData<VertexPositionColor>(vertices);
+            }
             collisionBox = new BoundingBox(vertices[0].Position, vertices[8].Position);
-        }
-
-        public void Freeze()
-        {
-            velocity = new Vector3(0, 0, 0);
-            gravityVelocity = 0.0f;
-            velocityDropoff = 0.0f;
+            previousLocation = Camera.Position;
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Blockshooter
         SpriteBatch spriteBatch;
 
         Camera camera;
+        Player player;
         Floor floor;
         List<Block> blockList;
         int cooldownDefault = 1;
@@ -58,6 +59,7 @@ namespace Blockshooter
             vertexBuffer.SetData<VertexPositionColor>(triangleVerticies);
             camera = new Camera(GraphicsDevice);
             floor = new Floor(GraphicsDevice);
+            player = new Player(GraphicsDevice, camera, camera.velocity, Color.Red);
             blockList = new List<Block>();
 
         }
@@ -74,6 +76,8 @@ namespace Blockshooter
 
         protected override void Update(GameTime gameTime)
         {
+            player.canMove = true;
+            camera.canMove = true;
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -88,6 +92,39 @@ namespace Blockshooter
             direction.Normalize();
 
             Vector3 normal = Vector3.Cross(direction, camera.Up);
+
+            if (!player.collisionBox.Intersects(floor.collisionBox))
+            {
+                camera.UpdateGravity();
+            }
+            else
+            {
+                camera.isJumping = false;
+            }
+
+            foreach (Block block in blockList)
+            {
+                if (player.collisionBox.Intersects(block.collisionBox))
+                {
+                    player.canMove = false;
+                    camera.canMove = false;
+                }
+                if (!block.collisionBox.Intersects(floor.collisionBox))
+                {
+                    block.UpdateGravity();
+                }
+                foreach (Block secondBlock in blockList)
+                {
+                    if (object.ReferenceEquals(block, secondBlock))
+                    {
+                        continue;
+                    }
+                    if (block.collisionBox.Intersects(secondBlock.collisionBox))
+                    {
+                        block.Freeze();
+                    }
+                }
+            }
 
             //You don't have to have the button pressed for an FPS obviously)`
             if (mouseState.RightButton == ButtonState.Pressed)
@@ -109,23 +146,26 @@ namespace Blockshooter
                     blockList.Add(new Block(GraphicsDevice, camera.Position + camera.Target*50, camera.Target*throwVelocityMultiplier, Color.Black));
                 }
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            if (camera.canMove)
             {
-                camera.Position += normal;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                camera.Position -= normal;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                camera.Position.Z = camera.Position.Z + camera.Target.Z;
-                camera.Position.X = camera.Position.X + camera.Target.X;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                camera.Position.Z = camera.Position.Z - camera.Target.Z;
-                camera.Position.X = camera.Position.X - camera.Target.X;
+                if (Keyboard.GetState().IsKeyDown(Keys.D))
+                {
+                    camera.Position += normal;
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.A))
+                {
+                    camera.Position -= normal;
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.W))
+                {
+                    camera.Position.Z = camera.Position.Z + camera.Target.Z;
+                    camera.Position.X = camera.Position.X + camera.Target.X;
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.S))
+                {
+                    camera.Position.Z = camera.Position.Z - camera.Target.Z;
+                    camera.Position.X = camera.Position.X - camera.Target.X;
+                }
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space))
@@ -135,33 +175,7 @@ namespace Blockshooter
                     camera.Jump(new Vector3(0, jumpVelocity, 0));
                 }
             }
-            if(camera.Position.Y >= 50)
-            {
-                camera.UpdateGravity();
-            }
-            else
-            {
-                camera.isJumping = false;
-            }
-            camera.UpdateCamera();
-            foreach (Block block in blockList)
-            {
-                if (!block.collisionBox.Intersects(floor.collisionBox))
-                {
-                    block.UpdateGravity();
-                }
-                foreach (Block secondBlock in blockList)
-                {
-                    if(object.ReferenceEquals(block, secondBlock))
-                    {
-                        continue;
-                    }
-                    if (block.collisionBox.Intersects(secondBlock.collisionBox)) 
-                    {
-                        block.Freeze();
-                    }
-                }
-            }
+
             if (timer > 60)
             {
                 if(blockCooldown > 0)
@@ -170,6 +184,9 @@ namespace Blockshooter
                 }
                 timer = 0;
             }
+
+            camera.UpdateCamera();
+            player.UpdateMovement();
             timer++;
 
             base.Update(gameTime);
@@ -196,6 +213,8 @@ namespace Blockshooter
                 GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, 3);
                 GraphicsDevice.SetVertexBuffer(floor.vertexBuffer);
                 GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, 6);
+                GraphicsDevice.SetVertexBuffer(player.vertexBuffer);
+                GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, 12);
                 foreach (Block block in blockList)
                 {
                     GraphicsDevice.SetVertexBuffer(block.vertexBuffer);

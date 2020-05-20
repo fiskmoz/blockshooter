@@ -15,6 +15,7 @@ namespace Blockshooter.Entities
         public Vector3 Up;
         public Vector3 velocity;
         public bool isJumping = false;
+        public bool canMove = true;
 
         // WHAT THE CAMERA CAN SEE
         public Matrix ProjectionMatrix;
@@ -37,6 +38,7 @@ namespace Blockshooter.Entities
 
         public void UpdateCamera()
         {
+
             ViewMatrix = Matrix.CreateLookAt(Position, Position + Target*2, Up);
         }
 
